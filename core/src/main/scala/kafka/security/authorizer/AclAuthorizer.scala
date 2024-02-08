@@ -526,8 +526,10 @@ class AclAuthorizer extends Authorizer with Logging {
   }
 
   def isSuperUser(principal: KafkaPrincipal): Boolean = {
+    println("DEBUG: checking " + principal.getName)
     if (superUsers.contains(principal)) {
       authorizerLogger.debug(s"principal = $principal is a super user, allowing operation without checking acls.")
+      println("DEBUG: true")
       true
     } else false
   }
