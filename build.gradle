@@ -1136,6 +1136,20 @@ project(':core') {
     standardOutput = new File(generatedDocsDir, "kafka_config.html").newOutputStream()
   }
 
+  task genBrokerConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.apache.kafka.server.config.BrokerConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "broker_config.html").newOutputStream()
+  }
+
+  task genControllerConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.apache.kafka.server.config.ControllerConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "controller_config.html").newOutputStream()
+  }
+
   task genTopicConfigDocs(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'org.apache.kafka.storage.internals.log.LogConfig'

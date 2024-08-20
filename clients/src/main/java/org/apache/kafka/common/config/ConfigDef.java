@@ -134,6 +134,23 @@ public class ConfigDef {
         return this;
     }
 
+
+
+    /**
+     * Define a new configuration
+     * @param name          the name of the config parameter
+     * @param type          the type of the config
+     * @param defaultValue  the default value to use if this config isn't present
+     * @param validator     the validator to use in checking the correctness of the config
+     * @param importance    the importance of this config
+     * @param documentation the documentation string for the config
+     * @param nodeRoles     the node roles this config is applicable to
+     * @return This ConfigDef so you can chain calls
+     */
+    public ConfigDef define(String name, Type type, Object defaultValue, Validator validator, Importance importance, String documentation, NodeRoles nodeRoles) {
+        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, null, -1, Width.NONE, name, Collections.emptyList(), null, false, nodeRoles, null));
+    }
+
     /**
      * Define a new configuration
      * @param name          the name of the config parameter
@@ -152,7 +169,7 @@ public class ConfigDef {
      */
     public ConfigDef define(String name, Type type, Object defaultValue, Validator validator, Importance importance, String documentation,
                             String group, int orderInGroup, Width width, String displayName, List<String> dependents, Recommender recommender) {
-        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, group, orderInGroup, width, displayName, dependents, recommender, false, null));
+        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, group, orderInGroup, width, displayName, dependents, recommender, false, null, null));
     }
 
     /**
@@ -175,7 +192,7 @@ public class ConfigDef {
     public ConfigDef define(String name, Type type, Object defaultValue, Validator validator, Importance importance, String documentation,
                             String group, int orderInGroup, Width width, String displayName, List<String> dependents, Recommender recommender,
                             String alternativeString) {
-        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, group, orderInGroup, width, displayName, dependents, recommender, false, alternativeString));
+        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, group, orderInGroup, width, displayName, dependents, recommender, false, null , alternativeString));
     }
 
     /**
@@ -449,7 +466,7 @@ public class ConfigDef {
      * @return This ConfigDef so you can chain calls
      */
     public ConfigDef defineInternal(final String name, final Type type, final Object defaultValue, final Importance importance) {
-        return define(new ConfigKey(name, type, defaultValue, null, importance, "", "", -1, Width.NONE, name, Collections.emptyList(), null, true, null));
+        return define(new ConfigKey(name, type, defaultValue, null, importance, "", "", -1, Width.NONE, name, Collections.emptyList(), null, true, null, null));
     }
 
     /**
@@ -464,7 +481,7 @@ public class ConfigDef {
      * @return This ConfigDef so you can chain calls
      */
     public ConfigDef defineInternal(final String name, final Type type, final Object defaultValue, final Validator validator, final Importance importance, final String documentation) {
-        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, "", -1, Width.NONE, name, Collections.emptyList(), null, true, null));
+        return define(new ConfigKey(name, type, defaultValue, validator, importance, documentation, "", -1, Width.NONE, name, Collections.emptyList(), null, true, null, null));
     }
 
     /**
@@ -909,6 +926,24 @@ public class ConfigDef {
         NONE, SHORT, MEDIUM, LONG
     }
 
+    public static class NodeRoles {
+        private final boolean controller;
+        private final boolean broker;
+
+        public NodeRoles(boolean controller, boolean broker) {
+            this.controller = controller;
+            this.broker = broker;
+        }
+
+        public boolean isController() {
+            return controller;
+        }
+
+        public boolean isBroker() {
+            return broker;
+        }
+    }
+
     /**
      * This is used by the {@link #validate(Map)} to get valid values for a configuration given the current
      * configuration values in order to perform full configuration validation and visibility modification.
@@ -1248,6 +1283,7 @@ public class ConfigDef {
         public final List<String> dependents;
         public final Recommender recommender;
         public final boolean internalConfig;
+        public final NodeRoles nodeRoles;
         public final String alternativeString;
 
         // This constructor is present for backward compatibility reasons.
@@ -1257,14 +1293,15 @@ public class ConfigDef {
                          List<String> dependents, Recommender recommender,
                          boolean internalConfig) {
             this(name, type, defaultValue, validator, importance, documentation, group, orderInGroup, width, displayName,
-                dependents, recommender, internalConfig, null);
+                dependents, recommender, internalConfig, null, null);
         }
 
         private ConfigKey(String name, Type type, Object defaultValue, Validator validator,
-                         Importance importance, String documentation, String group,
-                         int orderInGroup, Width width, String displayName,
-                         List<String> dependents, Recommender recommender,
-                         boolean internalConfig, String alternativeString) {
+                          Importance importance, String documentation, String group,
+                          int orderInGroup, Width width, String displayName,
+                          List<String> dependents, Recommender recommender,
+                          boolean internalConfig, NodeRoles nodeRoles,
+                          String alternativeString) {
             this.name = name;
             this.type = type;
             boolean hasDefault = !NO_DEFAULT_VALUE.equals(defaultValue);
@@ -1281,6 +1318,7 @@ public class ConfigDef {
             this.displayName = displayName;
             this.recommender = recommender;
             this.internalConfig = internalConfig;
+            this.nodeRoles = nodeRoles;
             this.alternativeString = alternativeString;
         }
 
@@ -1575,6 +1613,7 @@ public class ConfigDef {
                     embeddedDependents(keyPrefix, key.dependents),
                     embeddedRecommender(keyPrefix, key.recommender),
                     key.internalConfig,
+                    key.nodeRoles,
                     key.alternativeString));
         }
     }
