@@ -174,6 +174,13 @@ public abstract class MirrorConnectorConfig extends AbstractConfig {
         return result;
     }
 
+    Map<String, Object> sourceConsumerConfig(String role, Map<String, ?> overrideProps) {
+        Map<String, Object> result = sourceConsumerConfig(originals());
+        result.putAll(overrideProps);
+        addClientId(result, role);
+        return result;
+    }
+
     static Map<String, Object> sourceConsumerConfig(Map<String, ?> props) {
         Map<String, Object> result = new HashMap<>();
         result.putAll(Utils.entriesWithPrefix(props, SOURCE_CLUSTER_PREFIX));
